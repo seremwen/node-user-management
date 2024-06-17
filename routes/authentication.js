@@ -1,15 +1,38 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const router = express.Router();
 const authenticateToken = require('../middleware/authenticateToken'); // Your authenticateToken middleware
 const User = require('../models/User'); // Your User model
-const JWT_SECRET = 'your_jwt_secret'; // Replace with your actual JWT secret
+const JWT_SECRET = '413F4428472B4B6250655368566D5970337336763979244226452948404D6351'; // Replace with your actual JWT secret
 
 // Function to generate a random password
 const generateRandomPassword = () => {
     return crypto.randomBytes(8).toString('hex'); // 16 characters long password
+};
+// Function to send email
+const sendEmail = async (recipientEmail, subject, text) => {
+    let transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com', // SMTP server
+        port: 587, // SMTP server port
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: 'devseremwe@gmail.com', 
+            pass: 'iika gyxf fhha lmnf', 
+        },
+        tls: {
+            rejectUnauthorized: false // Accept self-signed certificates
+        }
+    });
+
+    await transporter.sendMail({
+        from: '"Dev Seremwe" devseremwe@gmail.com', 
+        to: recipientEmail,
+        subject: subject,
+        text: text,
+    });
 };
 // User registration
 /**
@@ -64,12 +87,19 @@ router.post('/register', async (req, res) => {
         if (!['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status value' });
         }
-
         const password = generateRandomPassword(); // Generate a random password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = await User.create({ username, password: hashedPassword, first_name, last_name, email, status });
-        res.status(201).json({ message: 'User created', user, password });
+
+        // Send the password to the user's email
+        await sendEmail(
+            email,
+            'Your account has been created',
+            `Dear ${first_name},\n\nYour account has been created successfully. Your password is: ${password}\n\nPlease change your password after logging in for the first time.\n\nBest regards,\nYour Team`
+        );
+
+        res.status(201).json({ message: 'User created and password sent to email', user });
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
