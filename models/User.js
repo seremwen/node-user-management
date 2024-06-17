@@ -64,16 +64,16 @@ const User = sequelize.define('User', {
         }
     },
     status: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED'),
         allowNull: false,
         validate: {
             notNull: {
                 msg: 'Status cannot be null'
             },
-            notEmpty: {
-                msg: 'Status cannot be empty'
+            isIn: {
+                args: [['ACTIVE', 'INACTIVE', 'SUSPENDED']],
+                msg: 'Status must be one of ACTIVE, INACTIVE, SUSPENDED'
             }
-            // You can add more validations as needed
         }
     },
     password: {

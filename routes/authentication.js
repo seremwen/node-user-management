@@ -1,12 +1,16 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const router = express.Router();
 const authenticateToken = require('../middleware/authenticateToken'); // Your authenticateToken middleware
-const User = require('../models/User'); // Your Student model
-
+const User = require('../models/User'); // Your User model
 const JWT_SECRET = 'your_jwt_secret'; // Replace with your actual JWT secret
 
+// Function to generate a random password
+const generateRandomPassword = () => {
+    return crypto.randomBytes(8).toString('hex'); // 16 characters long password
+};
 // User registration
 /**
  * @swagger
@@ -28,14 +32,11 @@ const JWT_SECRET = 'your_jwt_secret'; // Replace with your actual JWT secret
  *             type: object
  *             required:
  *               - username
- *               - password
  *               - last_name
  *               - first_name
  *               - email
  *             properties:
  *               username:
- *                 type: string
- *               password:
  *                 type: string
  *               last_name:
  *                 type: string
@@ -45,6 +46,10 @@ const JWT_SECRET = 'your_jwt_secret'; // Replace with your actual JWT secret
  *                 type: string
  *               status:
  *                 type: string
+ *                 enum:
+ *                   - ACTIVE
+ *                   - INACTIVE
+ *                   - SUSPENDED
  *     responses:
  *       201:
  *         description: User created successfully
@@ -53,10 +58,18 @@ const JWT_SECRET = 'your_jwt_secret'; // Replace with your actual JWT secret
  */
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, first_name, last_name, email, status } = req.body;
+        const { username, first_name, last_name, email, status } = req.body;
+
+        // Check if status is one of the allowed values
+        if (!['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status value' });
+        }
+
+        const password = generateRandomPassword(); // Generate a random password
         const hashedPassword = await bcrypt.hash(password, 10);
+
         const user = await User.create({ username, password: hashedPassword, first_name, last_name, email, status });
-        res.status(201).json({ message: 'User created', user });
+        res.status(201).json({ message: 'User created', user, password });
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
