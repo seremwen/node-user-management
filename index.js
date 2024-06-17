@@ -8,7 +8,6 @@ const authRouter= require('./routes/authentication'); // Authentication routes
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = 'your_jwt_secret_key'; // Replace with a strong secret key
 
 app.use(express.json());
 
@@ -17,9 +16,9 @@ const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
         info: {
-            title: 'Student API',
+            title: 'Authentication API',
             version: '1.0.0',
-            description: 'API for managing students and courses',
+            description: 'API endpoints for user authentication',
         },
         servers: [
             {
