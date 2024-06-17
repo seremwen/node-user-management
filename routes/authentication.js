@@ -74,6 +74,57 @@ router.post('/register', async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 });
+/**
+ * @swagger
+ * /auth/sign-up:
+ *   post:
+ *     summary: Signup
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *               - last_name
+ *               - first_name
+ *               - email
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               last_name:
+ *                 type: string
+ *               first_name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum:
+ *                   - ACTIVE
+ *                   - INACTIVE
+ *                   - SUSPENDED
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Invalid input
+ */
+router.post('/sign-up', async (req, res) => {
+    try {
+        const { username, password, first_name, last_name, email, status } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await User.create({ username, password: hashedPassword, first_name, last_name, email, status });
+        res.status(201).json({ message: 'User created', user });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
 
 // User login
 /**
