@@ -47,6 +47,8 @@ const sendEmail = async (recipientEmail, subject, text) => {
  *   post:
  *     summary: Register a new user
  *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -79,7 +81,7 @@ const sendEmail = async (recipientEmail, subject, text) => {
  *       400:
  *         description: Invalid input
  */
-router.post('/register', async (req, res) => {
+router.post('/register', authenticateToken, async (req, res) => {
     try {
         const { username, first_name, last_name, email, status } = req.body;
 

@@ -2,7 +2,8 @@ const express = require('express');
 const sequelize = require('./models/database'); // Your Sequelize setup
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-
+const User = require('./models/User'); // Importing the User model
+const bcrypt = require('bcrypt');
 const authRouter= require('./routes/authentication'); // Authentication routes
 
 const app = express();
@@ -49,8 +50,30 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Synchronize the database
 sequelize.sync().then(() => {
     console.log('Database synchronized');
+    createAdminUser();
 });
-
+// Function to create admin user if not exists
+const createAdminUser = async () => {
+    try {
+        const adminUser = await User.findOne({ where: { username: 'admin' } });
+        if (!adminUser) {
+            const hashedPassword = await bcrypt.hash('admin1234', 10);
+            await User.create({
+                username: 'admin',
+                first_name: 'admin',
+                last_name: 'admin',
+                email: 'admin@example.com', // You can add a default email or make it nullable
+                status: 'ACTIVE',
+                password: hashedPassword,
+            });
+            console.log('Admin user created');
+        } else {
+            console.log('Admin user already exists');
+        }
+    } catch (err) {
+        console.error('Error creating admin user:', err.message);
+    }
+};
 // Routes
 app.use('/auth', authRouter);
 
