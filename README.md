@@ -1,4 +1,3 @@
-Certainly! Below is the complete README file for your Node.js RESTful application:
 
 ---
 
