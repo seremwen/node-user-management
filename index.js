@@ -62,6 +62,7 @@ const createAdminUser = async () => {
                 username: 'admin',
                 first_name: 'admin',
                 last_name: 'admin',
+                role: 'SUPER_ADMIN',
                 email: 'admin@example.com', // You can add a default email or make it nullable
                 status: 'ACTIVE',
                 password: hashedPassword,

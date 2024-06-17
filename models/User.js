@@ -76,6 +76,19 @@ const User = sequelize.define('User', {
             }
         }
     },
+    role: {
+        type: DataTypes.ENUM('ADMIN', 'USER', 'SUPER_ADMIN'),
+        allowNull: false,
+        validate: {
+            notNull: {
+                msg: 'Status cannot be null'
+            },
+            isIn: {
+                args: [['ADMIN', 'USER', 'SUPER_ADMIN']],
+                msg: 'Status must be one of ADMIN, USER, SUPER_ADMIN'
+            }
+        }
+    },
     password: {
         type: DataTypes.STRING,
         allowNull: false,

@@ -75,6 +75,12 @@ const sendEmail = async (recipientEmail, subject, text) => {
  *                   - ACTIVE
  *                   - INACTIVE
  *                   - SUSPENDED
+ *               role:
+ *                 type: string
+ *                 enum:
+ *                   - ADMIN
+ *                   - USER
+ *                   - SUPER_ADMIN
  *     responses:
  *       201:
  *         description: User created successfully
@@ -83,16 +89,20 @@ const sendEmail = async (recipientEmail, subject, text) => {
  */
 router.post('/register', authenticateToken, async (req, res) => {
     try {
-        const { username, first_name, last_name, email, status } = req.body;
+        const { username, first_name, last_name, email, status,role } = req.body;
 
         // Check if status is one of the allowed values
         if (!['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status value' });
         }
+         // Check if role is one of the allowed values
+         if (!['ADMIN', 'USER', 'SUPER_ADMIN'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid role value' });
+        }
         const password = generateRandomPassword(); // Generate a random password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await User.create({ username, password: hashedPassword, first_name, last_name, email, status });
+        const user = await User.create({ username, password: hashedPassword,role, first_name, last_name, email, status });
 
         // Send the password to the user's email
         await sendEmail(
@@ -141,6 +151,12 @@ router.post('/register', authenticateToken, async (req, res) => {
  *                   - ACTIVE
  *                   - INACTIVE
  *                   - SUSPENDED
+ *              role:
+ *                 type: string
+ *                 enum:
+ *                   - ADMIN
+ *                   - USER
+ *                   - SUPER_ADMIN
  *     responses:
  *       201:
  *         description: User created successfully
@@ -149,7 +165,15 @@ router.post('/register', authenticateToken, async (req, res) => {
  */
 router.post('/sign-up', async (req, res) => {
     try {
-        const { username, password, first_name, last_name, email, status } = req.body;
+        const { username, password, first_name, last_name, email, status, role } = req.body;
+         // Check if status is one of the allowed values
+         if (!['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status value' });
+        }
+         // Check if role is one of the allowed values
+         if (!['ADMIN', 'USER', 'SUPER_ADMIN'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid role value' });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({ username, password: hashedPassword, first_name, last_name, email, status });
         res.status(201).json({ message: 'User created', user });
