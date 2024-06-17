@@ -2,9 +2,11 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const { Op } = require('sequelize');
 const router = express.Router();
 const authenticateToken = require('../middleware/authenticateToken'); // Your authenticateToken middleware
 const User = require('../models/User'); // Your User model
+const ResetToken = require('../models/ResetToken'); // Your User model
 const JWT_SECRET = 'your-key'; // Replace with your actual JWT secret
 
 // Function to send email
@@ -15,7 +17,7 @@ const sendEmail = async (recipientEmail, subject, text) => {
         secure: false, // true for 465, false for other ports
         auth: {
             user: 'devseremwe@gmail.com', 
-            pass: 'your-email-password', 
+            pass: 'iika gyxf fhha lmnf', 
         },
         tls: {
             rejectUnauthorized: false // Accept self-signed certificates
@@ -244,6 +246,150 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+// User FORGOT PASSWORD
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: fORGOT PASSWORD
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *             properties:
+ *               username:
+ *                 type: string
+ *               
+ *     responses:
+ *       200:
+ *         description: Reset Link sent successfully
+*       404:
+ *         description: Not Found
+
+ */
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const user = await User.findOne({ where: { username } });
+
+        if (!user) {
+            return res.status(404).json({ message: `User with username ${username} not found` });
+        }
+
+        const token = generateRandomToken(); // Generate a random token
+        const expires = new Date();
+        expires.setHours(expires.getHours() + 1); // Token expires in 1 hour
+
+        // Update user with the token and expiration
+        await ResetToken.upsert({
+            username: user.username,
+            resetPasswordToken: token,
+            resetPasswordExpires: expires
+        });
+        // Send the token to the user's email
+        await sendEmail(
+            user.email,
+            'Password Reset Request',
+            `Dear ${username},\n\nTo reset your password, please use this token: ${token}\n\nBest regards,\nYour Team`
+        );
+
+        res.status(200).json({ message: 'Password reset link sent', user });
+    } catch (err) {
+        if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+            const errors = err.errors.map(error => error.message);
+            return res.status(400).json({ message: 'Validation error', errors });
+        }
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// User Set new password
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Set new Password
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               
+ *     responses:
+ *       200:
+ *         description: Reset  successfully
+*       404:
+ *         description: Not Found
+
+ */
+router.post('/reset-password', async (req, res) => {
+    try {
+        console.log('Received reset password request');
+        const { token, newPassword } = req.body;
+        console.log(`Searching for user with token: ${token}`);
+
+        const resetToken = await ResetToken.findOne({
+            where: {
+                resetPasswordToken: token,
+                resetPasswordExpires: { [Op.gt]: new Date() } // Token is not expired
+            }
+        });
+
+        if (!resetToken) {
+            console.log('Invalid or expired token');
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        console.log(`Reset token found for username: ${resetToken.username}`);
+        const user = await User.findOne({ where: { username: resetToken.username } });
+
+        if (!user) {
+            console.log(`User with username ${resetToken.username} not found`);
+            return res.status(404).json({ message: `User with username ${resetToken.username} not found` });
+        }
+
+        console.log(`User found: ${user.username}`);
+        // Hash the new password before saving
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        console.log('New password hashed');
+
+        // Update user with the new password and clear the reset token
+        await user.update({
+            password: hashedPassword
+        });
+        await ResetToken.upsert({
+            username: user.username,
+            resetPasswordToken: null,
+            resetPasswordExpires: null
+        });
+        console.log('User password updated successfully');
+
+        // Delete the reset token
+        await ResetToken.destroy({ where: { username: resetToken.username } });
+        console.log('Reset token deleted successfully');
+
+        res.status(200).json({ message: 'Password has been reset' });
+        console.log('Password reset process completed successfully');
+    } catch (err) {
+        console.error('Error occurred:', err);
+        res.status(500).json({ message: err.message });
+    }
+});
 
 // Refresh JWT token
 /**
@@ -276,4 +422,15 @@ function generateRandomPassword() {
         password += charset[randomIndex];
     }
     return password;
+}
+
+function generateRandomToken() {
+    const length = 8;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let token = "";
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        token += charset[randomIndex];
+    }
+    return token;
 }

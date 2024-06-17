@@ -101,7 +101,8 @@ const User = sequelize.define('User', {
             }
             // You can add more validations as needed
         }
-    }
+    },
+  
 });
 
 module.exports = User;
