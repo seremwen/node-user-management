@@ -22,7 +22,7 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: `http://localhost:${PORT}`,
+                url: `https://node-user-management-hpip.onrender.com:${PORT}`,
             },
         ],
         components: {
