@@ -5,7 +5,7 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const User = require('./models/User'); // Importing the User model
 const bcrypt = require('bcrypt');
 const authRouter= require('./routes/authentication'); // Authentication routes
-
+const fileRoutes = require('./routes/fileRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -16,13 +16,13 @@ const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
         info: {
-            title: 'Authentication API',
+            title: 'File handling API',
             version: '1.0.0',
-            description: 'API endpoints for user authentication',
+            description: 'API endpoints for file handling',
         },
         servers: [
             {
-                url: `https://node-user-management-hpip.onrender.com`,
+                url: `http://localhost:${PORT}`,
             },
         ],
         components: {
@@ -76,7 +76,7 @@ const createAdminUser = async () => {
 };
 // Routes
 app.use('/auth', authRouter);
-
+app.use('/api', fileRoutes);
 // Error handler middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
