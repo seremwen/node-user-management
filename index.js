@@ -6,6 +6,8 @@ const User = require('./models/User'); // Importing the User model
 const bcrypt = require('bcrypt');
 const authRouter= require('./routes/authentication'); // Authentication routes
 const fileRoutes = require('./routes/fileRoutes');
+const memberRoutes = require('./routes/member');
+const certificateRoutes = require('./routes/certificate');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -77,6 +79,8 @@ const createAdminUser = async () => {
 // Routes
 app.use('/auth', authRouter);
 app.use('/api', fileRoutes);
+app.use('/members', memberRoutes);
+app.use('/certificates', certificateRoutes);
 // Error handler middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);

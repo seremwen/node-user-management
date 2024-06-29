@@ -7,7 +7,7 @@ const router = express.Router();
 const authenticateToken = require("../middleware/authenticateToken"); // Your authenticateToken middleware
 const User = require("../models/User"); // Your User model
 const ResetToken = require("../models/ResetToken"); // Your User model
-const JWT_SECRET = "your-key"; // Replace with your actual JWT secret
+const JWT_SECRET = "413F4428472B4B6250655368566D5970337336763979244226452948404D6351"; // Replace with your actual JWT secret
 // Regular expression for basic email validation
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Function to send email
