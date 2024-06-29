@@ -7,12 +7,20 @@ const fs = require('fs');
 const path = require('path');
 const QRCode = require('qrcode');
 
+
 /**
  * @swagger
- * /certificates/{certificateNumber}:
+ * tags:
+ *   name: Certificates API
+ *   description: The certificate managing API
+ */
+
+/**
+ * @swagger
+ * /api/v1/certificates/{certificateNumber}:
  *   get:
  *     summary: Generate and retrieve a PDF certificate
- *     tags: [Certificates]
+ *     tags: [Certificates API]
  *     parameters:
  *       - in: path
  *         name: certificateNumber

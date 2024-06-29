@@ -27,7 +27,7 @@ const upload = multer({ storage: storage });
  */
 /**
  * @swagger
- * /api/upload:
+ * /api/v1/files/upload:
  *   post:
  *     summary: Upload a file
  *     tags: [File Upload Api]
@@ -59,7 +59,7 @@ router.post('/upload',authenticateToken, upload.single('file'), async (req, res)
   });
 /**
  * @swagger
- * /api/files:
+ * /api/v1/files:
  *   get:
  *     summary: Get a file by its saved path
  *     tags: [File Upload Api]
@@ -78,7 +78,7 @@ router.post('/upload',authenticateToken, upload.single('file'), async (req, res)
  *       500:
  *         description: Internal server error
  */
-router.get('/files', async (req, res) => {
+router.get('/file', async (req, res) => {
     try {
       const filePath = req.query.path;
   

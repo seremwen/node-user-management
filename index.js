@@ -12,41 +12,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
-// Swagger setup
-const swaggerOptions = {
-    swaggerDefinition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'File handling API',
-            version: '1.0.0',
-            description: 'API endpoints for file handling',
-        },
-        servers: [
-            {
-                url: `http://localhost:${PORT}`,
-            },
-        ],
-        components: {
-            securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'JWT',
-                },
-            },
-        },
-        security: [
-            {
-                bearerAuth: [],
-            },
-        ],
-    },
-    apis: ['./routes/*.js'], // Files containing Swagger annotations (adjust as per your file structure)
-};
-
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+const setupSwagger = require('./config/swagger');
+setupSwagger(app);
 
 // Synchronize the database
 sequelize.sync().then(() => {
@@ -77,10 +44,10 @@ const createAdminUser = async () => {
     }
 };
 // Routes
-app.use('/auth', authRouter);
-app.use('/api', fileRoutes);
-app.use('/members', memberRoutes);
-app.use('/certificates', certificateRoutes);
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/files', fileRoutes);
+app.use('/api/v1/members', memberRoutes);
+app.use('/api/v1/certificates', certificateRoutes);
 // Error handler middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);

@@ -7,6 +7,8 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const authenticateToken = require("../middleware/authenticateToken"); // Your authenticateToken middleware
 
+
+
 /**
  * @swagger
  * components:
@@ -48,16 +50,16 @@ const authenticateToken = require("../middleware/authenticateToken"); // Your au
 /**
  * @swagger
  * tags:
- *   name: Members
+ *   name: Members API
  *   description: The members managing API
  */
 
 /**
  * @swagger
- * /members/create:
+ * /api/v1/members/create:
  *   post:
  *     summary: Create a new member
- *     tags: [Members]
+ *     tags: [Members API]
  *     requestBody:
  *       required: true
  *       content:
@@ -101,10 +103,10 @@ router.post("/create", authenticateToken, async (req, res) => {
 
 /**
  * @swagger
- * /members/{id}/approve:
+ * /api/v1/members/{id}/approve:
  *   patch:
  *     summary: Approve a member and generate a certificate number
- *     tags: [Members]
+ *     tags: [Members API]
  *     parameters:
  *       - in: path
  *         name: id

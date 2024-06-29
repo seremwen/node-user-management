@@ -42,7 +42,7 @@ const sendEmail = async (recipientEmail, subject, text) => {
  */
 /**
  * @swagger
- * /auth/register:
+ * /api/v1/auth/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Authentication]
@@ -136,7 +136,7 @@ router.post("/register", authenticateToken, async (req, res) => {
 // User signup
 /**
  * @swagger
- * /auth/sign-up:
+ * /api/v1/auth/sign-up:
  *   post:
  *     summary: Signup
  *     tags: [Authentication]
@@ -219,7 +219,7 @@ router.post("/sign-up", async (req, res) => {
 // User login
 /**
  * @swagger
- * /auth/login:
+ * /api/v1/auth/login:
  *   post:
  *     summary: Login a user
  *     tags: [Authentication]
@@ -278,7 +278,7 @@ router.post("/login", async (req, res) => {
 // User FORGOT PASSWORD
 /**
  * @swagger
- * /auth/forgot-password:
+ * /api/v1/auth/forgot-password:
  *   post:
  *     summary: fORGOT PASSWORD
  *     tags: [Authentication]
@@ -345,7 +345,7 @@ router.post("/forgot-password", async (req, res) => {
 // User Set new password
 /**
  * @swagger
- * /auth/reset-password:
+ * /api/v1/auth/reset-password:
  *   post:
  *     summary: Set new Password
  *     tags: [Authentication]
@@ -432,7 +432,7 @@ router.post("/reset-password", async (req, res) => {
 // Refresh JWT token
 /**
  * @swagger
- * /auth/refresh-token:
+ * /api/v1/auth/refresh-token:
  *   post:
  *     summary: Refresh JWT token
  *     tags: [Authentication]
