@@ -57,16 +57,23 @@ router.get('/:certificateNumber', async (req, res) => {
 
         // Create PDF document with A4 size (595.28 points wide x 841.89 points high)
         const doc = new PDFDocument({ size: 'A4', margin: 50 });
-        const filePath = path.resolve(`./certificates/${certificate.certificateNumber}.pdf`);
-        const stream = fs.createWriteStream(filePath);
 
-        doc.pipe(stream);
+        // Pipe the document to a buffer
+        let buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => {
+            let pdfData = Buffer.concat(buffers);
+
+            res.setHeader('Content-Disposition', `inline; filename="${certificate.certificateNumber}.pdf"`);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.send(pdfData);
+        });
 
         // Draw border
         doc
-            .lineWidth(4) // Set border width
+            .lineWidth(2) // Set border width
             .rect(20, 20, doc.page.width - 40, doc.page.height - 40) // Draw rectangle
-            .stroke(); // Render the borders
+            .stroke(); // Render the border
 
         // Add content to PDF
         doc.fontSize(20).text('Certificate of Approval', { align: 'center' });
@@ -88,7 +95,7 @@ router.get('/:certificateNumber', async (req, res) => {
         const issueDateY = doc.page.height - bottomMargin - 50; // Move signature up by 40 points
         const qrX = doc.page.width - 150; // Adjust based on your layout
         const rowY = doc.page.height - bottomMargin;
-        
+
         // Position elements
         doc.fontSize(12).text(`Signature: ${signature}`, signatureX, signatureY, { align: 'left' });
         doc.fontSize(12).text(`Issue Date: ${certificate.issueDate}`, issueDateX, issueDateY, { align: 'left' });
@@ -102,21 +109,6 @@ router.get('/:certificateNumber', async (req, res) => {
         doc.image(qrCodeBuffer, qrX, rowY - 80, { width: 80, height: 80 });
 
         doc.end(); // Close the PDF document
-
-        // Stream the PDF for download
-        res.setHeader('Content-Disposition', `attachment; filename="${certificate.certificateNumber}.pdf"`);
-        res.setHeader('Content-Type', 'application/pdf');
-
-        stream.on('finish', () => {
-            res.status(200).download(filePath, (err) => {
-                if (err) {
-                    console.error('Error downloading file:', err);
-                    res.status(500).json({ error: 'Error downloading file' });
-                }
-                // Delete the file after download if needed
-                fs.unlinkSync(filePath);
-            });
-        });
 
     } catch (error) {
         console.error('Error generating certificate:', error);
