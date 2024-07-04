@@ -64,9 +64,9 @@ router.get('/:certificateNumber', async (req, res) => {
 
         // Draw border
         doc
-            .lineWidth(2) // Set border width
+            .lineWidth(4) // Set border width
             .rect(20, 20, doc.page.width - 40, doc.page.height - 40) // Draw rectangle
-            .stroke(); // Render the border
+            .stroke(); // Render the borders
 
         // Add content to PDF
         doc.fontSize(20).text('Certificate of Approval', { align: 'center' });
@@ -88,7 +88,7 @@ router.get('/:certificateNumber', async (req, res) => {
         const issueDateY = doc.page.height - bottomMargin - 50; // Move signature up by 40 points
         const qrX = doc.page.width - 150; // Adjust based on your layout
         const rowY = doc.page.height - bottomMargin;
-
+        
         // Position elements
         doc.fontSize(12).text(`Signature: ${signature}`, signatureX, signatureY, { align: 'left' });
         doc.fontSize(12).text(`Issue Date: ${certificate.issueDate}`, issueDateX, issueDateY, { align: 'left' });
