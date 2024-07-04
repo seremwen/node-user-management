@@ -62,6 +62,12 @@ router.get('/:certificateNumber', async (req, res) => {
 
         doc.pipe(stream);
 
+        // Draw border
+        doc
+            .lineWidth(2) // Set border width
+            .rect(20, 20, doc.page.width - 40, doc.page.height - 40) // Draw rectangle
+            .stroke(); // Render the border
+
         // Add content to PDF
         doc.fontSize(20).text('Certificate of Approval', { align: 'center' });
         doc.moveDown();
@@ -117,4 +123,5 @@ router.get('/:certificateNumber', async (req, res) => {
         res.status(500).json({ error: 'Error generating certificate' });
     }
 });
+
 module.exports = router;
