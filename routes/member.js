@@ -1,10 +1,12 @@
 // routes/member.js
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
 const   Certificate  = require('../models/Certificate');
 const  Member  = require('../models/Member');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
+const upload = multer({ dest: 'uploads/' });
 const authenticateToken = require("../middleware/authenticateToken"); // Your authenticateToken middleware
 const memberController = require('../controllers/memberController');
 
@@ -129,5 +131,28 @@ router.patch('/:id/approve',authenticateToken, async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+/**
+ * @swagger
+ * /api/v1/members/upload:
+ *   post:
+ *     summary: Upload a file with multiple members
+ *     tags: [Members]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Members uploaded successfully
+ *       400:
+ *         description: Bad request
+ */
+router.post('/upload',authenticateToken, upload.single('file'), memberController.uploadMembers);
 
 module.exports = router;
