@@ -17,7 +17,20 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage,
+  limits: { fileSize: 1000000 },
+ });
+// Check file type
+function checkFileType(file, cb) {
+  const filetypes = /jpeg|jpg|png|gif/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb('Error: Images only! (jpeg, jpg, png, gif)');
+  }}
 // User registration
 /**
  * @swagger
@@ -59,7 +72,7 @@ router.post('/upload',authenticateToken, upload.single('file'), async (req, res)
   });
 /**
  * @swagger
- * /api/v1/files:
+ * /api/v1/files/file:
  *   get:
  *     summary: Get a file by its saved path
  *     tags: [File Upload Api]
